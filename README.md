@@ -1,10 +1,12 @@
 # Meitou Transport
 
-**[Download the playtest](https://github.com/mattresspad/Meitou-Mounts-Vehicles-Vessels/releases/download/v0.3.0-playtest.3/Meitou-Transport-0.3.0-playtest.3-handoff.zip)** · **[Watch the Stoat ride](https://streamable.com/5592xt)**
+**[Download the playtest](https://github.com/mattresspad/MeitouTransport/releases/download/v0.3.0-playtest.4/Meitou-Transport-0.3.0-playtest.4-handoff.zip)** · **[Watch the Stoat ride](https://streamable.com/5592xt)**
 
-Ride a squad animal or sail a one-seat vessel in Kenshi with **MeitouClient v0.17.4 for Windows x64**. This optional framework handles seating, movement, rendering and saves. Content packs choose which animals can carry a rider and where boats appear. Enabling the framework alone leaves the transport world empty.
+Ride a squad animal or sail a one-seat vessel in Kenshi with **MeitouClient v0.18.0 for Windows x64**. This optional framework handles seating, movement, rendering and saves. Content packs choose which animals can carry a rider and where boats appear. Enabling the framework alone leaves the transport world empty.
 
-**Public playtest `0.3.0-playtest.3`** includes four installable ZIPs, corresponding source and checksums. Extract the kit, then extract each mod you want directly into `Kenshi/mods/`. [Release notes and individual downloads](https://github.com/mattresspad/Meitou-Mounts-Vehicles-Vessels/releases/tag/v0.3.0-playtest.3)
+**Public playtest `0.3.0-playtest.4`** includes four installable ZIPs, corresponding source and checksums. Extract the kit, then extract each mod you want directly into `Kenshi/mods/`. [Release notes and individual downloads](https://github.com/mattresspad/MeitouTransport/releases/tag/v0.3.0-playtest.4)
+
+Players using MeitouClient **v0.17.4** can use the [previous playtest](https://github.com/mattresspad/MeitouTransport/releases/tag/v0.3.0-playtest.3).
 
 | Install | In game |
 | --- | --- |
@@ -17,7 +19,7 @@ Ride a squad animal or sail a one-seat vessel in Kenshi with **MeitouClient v0.1
 
 **For the skiff**, enable **Meitou Transport → Western Hive Skiff**. Select one squad member, open the console with **Insert**, and enter `tp -120780 -17640`. Choose **F10 → Board nearby vessel**, then **Sail to camera target**. Both examples can run together. [Install and playtest guide](PLAYTEST.md)
 
-For playtest feedback, include the game and mod versions, load order and what you saw. [Report a Transport issue](https://github.com/mattresspad/Meitou-Mounts-Vehicles-Vessels/issues)
+For playtest feedback, include the game and mod versions, load order and what you saw. [Report a Transport issue](https://github.com/mattresspad/MeitouTransport/issues)
 
 **Pack authors** can give a custom animal a saddle or place a boat using an FCS dependency, JSON and optional art. The worked examples create a separately named `Pack Bull Saddle.mod` and `Skiff.mod` without compiling C#. You may freely reuse the original sample art under CC0. [Pack author guide](AUTHORING.md) · [Licenses](LICENSING.md)
 

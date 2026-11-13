@@ -2,6 +2,9 @@ using Meitou.Data.Fcs;
 
 // Rebuild the original, data-only FCS scenario. Run from the repository root.
 const string mod = "Stoat Desert Ride.mod";
+bool packBeastTrial = args is ["--pack-beast", _];
+if (args.Length != 0 && !packBeastTrial)
+    throw new ArgumentException("Use no arguments for the original start, or --pack-beast <staged Stoat mod folder>.");
 var file = new FcsFile
 {
     Author = "Meitou Transport contributors",
@@ -32,7 +35,7 @@ var squad = Record(2, FcsRecordType.SquadTemplate, "Stoat riding party");
 squad.Bools["dont multiply"] = true;
 squad.Floats["animal age random"] = 0;
 squad.References["leader"] = [new(rider.StringId, 1, 0, 0)];
-squad.References["animals"] = [new("42201-rebirth.mod", 1, 1, 110)];
+squad.References["animals"] = [new(packBeastTrial ? "3999-gamedata.base" : "42201-rebirth.mod", 1, 1, 110)];
 squad.References["animals2"] = [new("43949-rebirth.mod", 1, 1, 110)];
 
 var start = Record(3, FcsRecordType.NewGameStartoff, "Stoat Desert Ride");
@@ -44,7 +47,7 @@ start.Strings["style"] = "Desert ride";
 start.References["squad"] = [new(squad.StringId, 1, 0, 0)];
 start.References["force race"] = [new(scorchlander, 100, 0, 0)];
 
-var folder = Path.Combine("mods", "Stoat Desert Ride");
+var folder = packBeastTrial ? args[1] : Path.Combine("mods", "Stoat Desert Ride");
 if (!File.Exists(Path.Combine(folder, "transport.json")))
     throw new DirectoryNotFoundException("Run the generator from the Meitou Transport repository root.");
 FcsWriter.WriteFile(file, Path.Combine(folder, mod));

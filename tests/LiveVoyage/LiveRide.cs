@@ -3,10 +3,10 @@ using System.Numerics;
 using System.Text.Json;
 using HarmonyLib;
 using Meitou.Content;
-using Meitou.Data;
 using Meitou.Data.Characters;
 using Meitou.Data.Gameplay;
 using Meitou.Game.Host;
+using Meitou.Game.Host.Cameras;
 using Meitou.Game.Rendering.Objects;
 using Meitou.Modding;
 using Meitou.Simulation;
@@ -35,6 +35,9 @@ internal static class LiveRide
     private static float initialYaw, low, high;
     private static readonly HashSet<string> gaits = [];
     private static int frames;
+    private static int turnFrames, bagFrames;
+    private static float maxSeatError, maxSaddleError;
+    private static long lastCaptureTick = -10;
     private static bool flatFit;
     private static bool desert;
     private static long? restoredTick;
@@ -49,11 +52,11 @@ internal static class LiveRide
     internal static void Arm()
     {
         string? trial = Environment.GetEnvironmentVariable("MEITOU_TRANSPORT_RIDE");
-        if (trial is not ("fit" or "garru" or "bare" or "bags" or "bull" or "mixed" or "stoat")) return;
+        if (trial is not ("fit" or "garru" or "bare" or "bags" or "bull" or "mixed" or "stoat" or "stoat-bags")) return;
         var args = Environment.GetCommandLineArgs();
         int startOption = Array.IndexOf(args, "--new-game");
         flatFit = trial == "fit";
-        desert = trial == "stoat";
+        desert = trial is "stoat" or "stoat-bags";
         if (flatFit ? !args.Contains("--sandbox") : startOption < 0 || startOption + 1 >= args.Length
             || args[startOption + 1] != (desert ? DesertRide.Start : "The Wandering Trader")) return;
         if (Harmony.HasAnyPatches(ProbeId)) return;
@@ -76,8 +79,6 @@ internal static class LiveRide
             h.Patch(AccessTools.Method(typeof(PopulationSystem), nameof(PopulationSystem.SpawnSandbox)), prefix: Hook(nameof(PlaceOwnedAnimal)));
         else if (!desert && trial != "bull")
             h.Patch(AccessTools.Method(typeof(SquadTemplate), "From"), postfix: Hook(nameof(StockAnimalFixture)));
-        if (trial == "bags")
-            h.Patch(AccessTools.Method(typeof(CharacterAppearance), nameof(CharacterAppearance.BuildAnimal)), postfix: Hook(nameof(LuggageFitFixture)));
         var renderer = typeof(IMod).Assembly.GetType("Meitou.Game.Rendering.Characters.CharacterRenderer", true)!;
         var observe = Hook(nameof(Frame));
         observe.after = ["meitou.transport"];
@@ -153,14 +154,13 @@ internal static class LiveRide
         }
     }
 
-    // v0.17.4 equips the stock luggage and draws its light. Show its original skinned mesh in this one QA profile.
-    private static void LuggageFitFixture(GameDatabase db, GameRecord animal, CharacterAppearance __result)
+    private static void CheckStockBag(CharacterSnapshot animal)
     {
-        if (animal.StringId != record || db.Find("4002-gamedata.base") is not { } bag) return;
-        var path = bag.GetPath("mesh");
-        if (path.Length == 0) throw new InvalidDataException("Pack Beast luggage mesh missing.");
-        if (__result.Parts.All(p => p.Mesh != path))
-            __result.Parts.Add(new CharacterPart { Record = bag, Mesh = path, Field = "mesh", Mode = AttachMode.SharedSkeleton });
+        var look = animal.Appearance;
+        Check(look?.AnimalBackpack?.StringId == DesertRide.StockBag && look.Parts.Count(p =>
+            p.Record.StringId == DesertRide.StockBag && p.Mode == AttachMode.SharedSkeleton
+            && Path.GetFileName(p.Mesh).Equals("pack_beast_luggage.mesh", StringComparison.OrdinalIgnoreCase)) == 1,
+            "Native Pack Beast appearance must include exactly one skinned stock luggage mesh.");
     }
     private static object? Field(object o, string n) => AccessTools.Field(o.GetType(), n).GetValue(o);
     private static void Go(Stage next) { stage = next; since = Stopwatch.GetTimestamp(); }
@@ -192,7 +192,17 @@ internal static class LiveRide
                 status = Stopwatch.GetTimestamp();
             }
             void Move(CharacterSnapshot who, Vector3 to) => world.Commands.Enqueue(new MoveOrder([who.Id], to) { Tick = world.Tick });
-            void Camera() => session.Camera.Place(new(animal.Position.X, animal.Position.Z), 1.1f, .26f, 98);
+            void Camera()
+            {
+                if (!desert) { session.Camera.Place(new(animal.Position.X, animal.Position.Z), 1.1f, .26f, 98); return; }
+                // Keep one world-space viewing angle for the whole corner, broadside halfway through.
+                var target = animal.Position + 17f * animal.Scale * Vector3.UnitY;
+                float yaw = MathF.Atan2(route.First.X, route.First.Z) - .75f * MathF.PI;
+                const float pitch = .17f, distanceToTarget = 99;
+                var eye = CameraState.EyeFor(target, yaw, pitch, distanceToTarget);
+                session.Camera.TakeOver(new(eye, Vector3.Normalize(target - eye), Vector3.UnitY,
+                    target, yaw, pitch, distanceToTarget, true), strategy: false);
+            }
             void Shot(string name)
             {
                 var channel = Field(host, "AgentChannel")!;
@@ -205,10 +215,18 @@ internal static class LiveRide
             if (drawn && stage is >= Stage.Mount and <= Stage.Saving)
             {
                 CheckFrame(__instance, host, animal, rider, saddle);
+                if (record == DesertRide.PackBeast) { CheckStockBag(animal); bagFrames++; }
+                if (stage == Stage.Turn) turnFrames++;
                 foreach (var layer in animal.Animations) gaits.Add(layer.Name);
                 low = Math.Min(low, animal.Position.Y);
                 high = Math.Max(high, animal.Position.Y);
                 frames++;
+            }
+            if (desert && drawn && (stage == Stage.Run || stage == Stage.Turn) && snap.Tick - lastCaptureTick >= 3)
+            {
+                lastCaptureTick = snap.Tick;
+                Shot($"ride-{snap.Tick:D6}");
+                Log(FormattableString.Invariant($"capture tick={snap.Tick} stage={stage} yaw={animal.Yaw:F4}"));
             }
             switch (stage)
             {
@@ -221,7 +239,12 @@ internal static class LiveRide
                     Check(backpack == expectedBag, $"missing stock inventory, expected {expectedBag}, got {backpack}");
                     Log($"start {rider.Name} and {animal.Name}, backpack={backpack}, inventory entries={cargo.Length}, scale={animal.Scale}, position={animal.Position}");
                     var site = route.Site;
-                    if (desert) DesertRide.CheckStart(world, snap, rider);
+                    if (desert)
+                    {
+                        DesertRide.CheckStart(world, snap, rider, record);
+                        var channel = Field(host, "AgentChannel")!;
+                        AccessTools.Field(channel.GetType(), "InterfaceHidden").SetValue(channel, true);
+                    }
                     else world.Commands.Enqueue(new DebugTeleport([animal.Id, rider.Id], site) { Tick = world.Tick });
                     world.Commands.Enqueue(new SelectCommand([rider.Id]) { Tick = world.Tick });
                     session.Camera.Place(new(site.X, site.Z), 1.1f, .26f, 98);
@@ -251,6 +274,7 @@ internal static class LiveRide
                     Camera();
                     if (frames < 10 || Vector3.Distance(corner, animal.Position) < 42 || Math.Abs(MathF.IEEERemainder(animal.Yaw - initialYaw, MathF.Tau)) < .65f) return;
                     Check(drawn && animal.Selected && distance < .1f && (flatFit || desert || high - low > .6f), $"ride/turn/slope evidence, frames={frames}, relief={high - low}");
+                    Log(FormattableString.Invariant($"turn: poses={frames} turnFrames={turnFrames} nativeBagFrames={bagFrames} headingChange={Math.Abs(MathF.IEEERemainder(animal.Yaw - initialYaw, MathF.Tau)) * 180 / MathF.PI:F1} deg, maxSaddleError={maxSaddleError:F5} maxSeatError={maxSeatError:F5} units"));
                     Shot("turn");
                     if (flatFit)
                     {
@@ -279,6 +303,7 @@ internal static class LiveRide
                         $"restored native pair, route or inventory differs; distance {distance}, backpack {bag}, travel {Vector3.Distance(restoredAnimal, animal.Position)}");
                     Log($"reload on foot beside original animal, distance={distance:F1}, backpack={bag}, inventory entries={cargo.Length}");
                     if (desert) DesertRide.CheckRider(world, rider);
+                    if (record == DesertRide.PackBeast) CheckStockBag(animal);
                     world.Commands.Enqueue(new SelectCommand([rider.Id]) { Tick = world.Tick });
                     Go(Stage.Remount); break;
                 case Stage.Remount:
@@ -329,7 +354,7 @@ internal static class LiveRide
                     LiveVoyage.Command(host, session, "Dismount"); Go(Stage.LeaveBull); break;
                 case Stage.LeaveBull:
                     if (!rider.Selected || !File.Exists("bull.png")) return;
-                    Log("PASS Stoat outfit, authored start, Garru ride and turn, save, reload, remount, and Domesticated Bull ride");
+                    Log($"PASS Stoat outfit, authored start, {animal.Name} ride and turn, save, reload, remount, and Domesticated Bull ride");
                     Go(Stage.Done); break;
             }
         }
@@ -362,11 +387,16 @@ internal static class LiveRide
         var expected = Matrix4x4.CreateFromQuaternion(saddleRotation) * Matrix4x4.CreateTranslation(saddleOffset) * Anchor(carrier, bone);
         var centre = ((DebrisRenderer)Field(Field(host, "Gpu")!, "Debris")!).Centre(piece.Mesh)!.Value;
         var origin = piece.Position - Vector3.Transform(centre * piece.Scale, piece.Rotation);
-        Check(Matrix4x4.Decompose(expected, out var scale, out var rot, out var point) && Vector3.Distance(point, origin) < .08f
+        bool decomposed = Matrix4x4.Decompose(expected, out var scale, out var rot, out var point);
+        float saddleError = Vector3.Distance(point, origin);
+        maxSaddleError = Math.Max(maxSaddleError, saddleError);
+        Check(decomposed && saddleError < .08f
             && MathF.Abs(Quaternion.Dot(rot, piece.Rotation)) > .999f && Math.Abs(scale.X - piece.Scale) < .005f, "saddle differs from the current back bone");
         var body = (Matrix4x4)Field(passenger, "World")!;
         var facing = Vector3.Transform(Vector3.TransformNormal(Vector3.UnitZ, Matrix4x4.CreateRotationY(seatYaw)), rot);
-        Check(Vector3.Distance(Anchor(passenger, "Bip01 Pelvis").Translation, Vector3.Transform(seatOffset, expected)) < .08f
+        float seatError = Vector3.Distance(Anchor(passenger, "Bip01 Pelvis").Translation, Vector3.Transform(seatOffset, expected));
+        maxSeatError = Math.Max(maxSeatError, seatError);
+        Check(seatError < .08f
             && Math.Abs(Vector3.TransformNormal(Vector3.UnitX, body).Length() - rider.Scale) < .01f
             && Vector3.Dot(Vector3.Normalize(Vector3.TransformNormal(Vector3.UnitZ, body)), facing) > .999f,
             "rider pelvis, facing or proportions differ from the current saddle");

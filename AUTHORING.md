@@ -1,6 +1,6 @@
 # Make a transport pack
 
-Install **Meitou Transport 0.3.0-playtest.3** for **MeitouClient v0.17.4**. Players enable the framework and the pack you author. Your pack decides which boats are placed and which animal records have a riding fit. These recipes require only FCS, JSON and the art you choose.
+Install **Meitou Transport 0.3.0-playtest.4** for **MeitouClient v0.18.0**. Players enable the framework and the pack you author. Your pack decides which boats are placed and which animal records have a riding fit. These recipes require only FCS, JSON and the art you choose.
 
 The original skiff, saddle, textures, example headers and definitions are dedicated to the public domain under CC0. You may rename, modify and redistribute them in your own packs, including commercial work, without attribution. [License terms](LICENSING.md)
 
@@ -77,7 +77,7 @@ The original skiff, saddle, textures, example headers and definitions are dedica
 
 Measure `saddleOffset` from the named bone's rest position, in the animal model's axes and units. +Y is up and +Z is forward. `saddleRotationDegrees` is [pitch about X, yaw about Y, roll about Z], using Meitou's yaw/pitch/roll convention. The animated bone carries this fit through every stride. `seatOffset` locates the seated rider's pelvis in saddle-local axes. `seatYawDegrees` turns the rider about the saddle's +Y. Adjust height and facing in game. Growth scales the saddle and the seat placement while the rider keeps their own size.
 
-Omit both art fields if another part of your mod draws the saddle, or omit just `texture` to use the mesh material. The stock Pack Beast in v0.17.4 shows the lantern from its equipped backpack. Use `saddleMesh` for artwork you want the framework to draw while ridden. Eligibility comes from owning a healthy matching animal. Your pack can supply custom FCS animal records, saddle items and art.
+Omit both art fields if another part of your mod draws the saddle, or omit just `texture` to use the mesh material. In v0.18.0 the stock Pack Beast shows its equipped backpack. Leave room for the bags behind the seat when fitting art. Use `saddleMesh` for artwork you want the framework to draw while ridden. Eligibility comes from owning a healthy matching animal. Your pack can supply custom FCS animal records, saddle items and art.
 
 Schema 3 accepts mount-only packs and mixed packs with `mounts`, `vessels` and `placements`. Within one pack each animal record has one fit. Across packs the last valid fit in enabled mod order wins. The game log names both `.mod` files and fit IDs on an override, or the manifest and missing bone if validation fails.
 

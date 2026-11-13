@@ -1,6 +1,6 @@
 # Run release acceptance in a fresh directory using the install's read-only data and private mods, settings and saves.
 param(
-    [Parameter(Mandatory)][ValidateSet('core','garru','bare','fit','bags','bull','mixed','stoat','example','old-save')][string]$Scenario,
+    [Parameter(Mandatory)][ValidateSet('core','garru','bare','fit','bags','bull','mixed','stoat','stoat-bags','example','old-save')][string]$Scenario,
     [Parameter(Mandatory)][string]$Kenshi,
     [Parameter(Mandatory)][string]$Game,
     [Parameter(Mandatory)][string]$TrialDirectory,
@@ -19,9 +19,13 @@ New-Item -ItemType Junction -Path (Join-Path $install 'data') -Target (Join-Path
 foreach ($file in 'resources.cfg','fcs.def','controls.cfg','screens.cfg','kenshi.cfg','settings.cfg','currentVersion.txt','__tutorials.data') {
     if (Test-Path -LiteralPath (Join-Path $source $file)) { Copy-Item -LiteralPath (Join-Path $source $file) -Destination $install }
 }
-$staging = switch ($Scenario) { 'old-save' { 'example' } 'bare' { 'garru' } 'fit' { 'garru' } 'bags' { 'garru' } default { $Scenario } }
+$staging = switch ($Scenario) { 'old-save' { 'example' } 'bare' { 'garru' } 'fit' { 'garru' } 'bags' { 'garru' } 'stoat-bags' { 'stoat' } default { $Scenario } }
 & python (Join-Path $PSScriptRoot 'prepare.py') $staging (Join-Path $install 'mods')
 if ($LASTEXITCODE -ne 0) { throw 'Could not stage release ZIPs.' }
+if ($Scenario -eq 'stoat-bags') {
+    & dotnet (Join-Path $PSScriptRoot '../../tools/DesertRide/bin/Release/net11.0/DesertRide.dll') --pack-beast (Join-Path $install 'mods/Stoat Desert Ride')
+    if ($LASTEXITCODE -ne 0) { throw 'Could not stage the Pack Beast start.' }
+}
 $list = @('Meitou Transport.mod')
 if ($staging -in 'garru','mixed','stoat') { $list += 'Garru Saddle.mod' }
 if ($staging -eq 'stoat') { $list += 'Stoat Desert Ride.mod' }
@@ -48,11 +52,12 @@ if ($CacheDirectory) {
     $clientEnv.MEITOU_OBJECT_LOD_CACHE = Join-Path $CacheDirectory 'objlods'
     $clientEnv.MEITOU_CHARACTER_LOD_CACHE = Join-Path $CacheDirectory 'charlods'
 }
-if ($Scenario -in 'garru','bare','fit','bags','bull','mixed','stoat') {
+if ($Scenario -in 'garru','bare','fit','bags','bull','mixed','stoat','stoat-bags') {
     $clientEnv.MEITOU_TRANSPORT_RIDE = $Scenario
     $start = switch ($Scenario) {
         'fit' { '--sandbox 2 --sandbox-character 1995-gamedata.base' }
         'stoat' { '--new-game "Stoat Desert Ride"' }
+        'stoat-bags' { '--new-game "Stoat Desert Ride"' }
         default { '--new-game "The Wandering Trader"' }
     }
 } else {
@@ -80,7 +85,7 @@ if ($CpuVulkanIcd) {
     $clientEnv.MEITOU_VRAM_BUDGET_MB = '768'
     $options += ' --no-objects --distant-range 0 --radius 0.5 --shadow-range 0 --texture-quality 3 --fps-limit 12 --size 640x448'
 } else {
-    $options += ' --shadow-quality 0 --texture-quality 1 --fps-limit 24 --size 1100x760'
+    $options += ' --shadow-quality 0 --texture-quality 1 --fps-limit 24 --size 1280x800'
 }
 $arguments = "$start $options" + ' --control-dir "' + $control + '" --mods-cfg "' + $cfg + '"'
 # Start-Process inherits the environment on Windows PowerShell 5.1. Restore it immediately so

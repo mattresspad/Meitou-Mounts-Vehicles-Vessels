@@ -1,6 +1,6 @@
 # Live riding and voyage verification
 
-Build `dotnet build tests/LiveVoyage/LiveVoyage.csproj -c Release` using the v0.17.4 game DLLs. Package the installable ZIPs with `python tools/package.py`. [Build instructions](../../CONTRIBUTING.md)
+Set `MEITOU_DIR` to the extracted v0.18.0 Windows game directory. Build the framework and this verifier in Release, then run `python tools/package.py`. For the Stoat Pack Beast trial, also run `dotnet build tools/DesertRide/DesertRide.csproj -c Release`. Both Stoat scenarios exercise the local v0.18.0 build.
 
 ## Windows release trials
 
@@ -16,7 +16,8 @@ For a lightweight visual check, choose **fit**. It runs the released client's fl
 
 - **bull** follows the packaged author guide to create **Pack Bull Saddle.mod** with its own manifest and asset filenames. Only the framework and this pack are enabled. The client starts **The Wandering Trader** with its ordinary Pack Bull.
 - **stoat** starts the packaged **Stoat Desert Ride** with its normal FCS squad. It checks the authored position, female Scorchlander and all four equipment slots before mounting at the actual spawn. After riding and reloading it also mounts, rides and dismounts the Domesticated Bull. The player can independently choose this start from New Game to record without the driver.
-- **bare** uses an adult stock Garru and **garru** uses the trader fixture's younger Pack Beast. The external fixture supplies the animal record and starting age, then the game creates both characters normally. **mixed** also enables Western Hive Skiff. **bags** additionally asks the QA renderer to display the Pack Beast's installed, skinned luggage mesh for a visual clearance check. Production packages use the client's ordinary backpack visuals.
+- **stoat-bags** swaps the adult Garru for an adult stock Pack Beast in the trial's copy of the FCS squad. The client equips and renders its own stock backpack. The driver checks its item ID, skinned luggage mesh and inventory through save and reload. Run **stoat** and **stoat-bags** consecutively in separate trial directories to compare the same turn, camera angle, and original saddle fit. Each run saves HUD-free `ride-<tick>.png` frames during the run-up and turn, plus `walk.png` and `turn.png`. The log records heading and maximum saddle and pelvis placement error in world units.
+- **bare** uses an adult stock Garru and **garru** and **bags** use the trader fixture's younger Pack Beast. The fixture supplies the animal record and starting age, then the game creates both characters normally. **mixed** also enables Western Hive Skiff.
 - Each ride goes through the real F10 handler and native move orders. The driver compares the submitted saddle and the rider's posed pelvis with the animal bone each rendered frame, then saves, reloads, remounts, dismounts and moves on foot. Look for `LIVE RIDE PASS` and inspect `walk.png` and `turn.png`.
 - **core** checks the empty framework, **example** replays the Western Hive voyage, and **old-save** takes an additional `-OldSave` path to an existing Western Hive slot. It copies the slot, verifies the saved hull pose, then boards and sails again. Look for `LIVE VOYAGE PASS`.
 
@@ -24,7 +25,7 @@ For a lightweight visual check, choose **fit**. It runs the released client's fl
 
 Run `python tests/LiveVoyage/prepare.py author <empty-QA-mods-directory>` for the independent-author trial. The script extracts the packaged framework and follows its bundled guide to create the data-only **Skiff.mod**. Use `core` for the framework alone or `example` for the two shipping ZIPs. Point Meitou at a test installation with the original game data and those mod folders. Supply a separate `--mods-cfg` listing the framework first and the chosen content mod second.
 
-Set the following variables for the **test process** and start the v0.17.4 game with `--new-game Wanderer`.
+Set the following variables for the **test process** and start the v0.18.0 game with `--new-game Wanderer`.
 
 | Variable | Value |
 | --- | --- |

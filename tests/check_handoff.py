@@ -22,7 +22,7 @@ def check():
     names = [f"{pack.replace(' ', '-')}-{version}.zip" for pack in PACKS]
     commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
     env = os.environ.copy()
-    env["MEITOU_DIR"] = str(Path(env.get("MEITOU_DIR") or ROOT / ".local/game/Meitou-0.17.4-win-x64").resolve())
+    env["MEITOU_DIR"] = str(Path(env.get("MEITOU_DIR") or ROOT / ".local/game/Meitou-0.18.0-win-x64").resolve())
 
     with ZipFile(ROOT / "dist" / f"{prefix}-handoff.zip") as kit, TemporaryDirectory(prefix="transport test ") as temp:
         checksums = kit.read("SHA256SUMS.txt").decode("ascii").splitlines()

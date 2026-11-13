@@ -1,13 +1,13 @@
 # Building and testing Meitou Transport
 
-Use the **.NET 11 SDK** (11.0.100 for this candidate), **Python 3.9+**, and the **Windows x64 v0.17.4 game** release. Extract the game to a directory of your choice. `MEITOU_DIR` points to the directory containing `MeitouClient.dll`, `Meitou.Core.dll`, `Meitou.Data.dll`, `Meitou.Simulation.dll` and `0Harmony.dll`. If you prefer a project-local install, the default is `.local/game/Meitou-0.17.4-win-x64/`. The framework references these assemblies at build time. Players get them from Meitou. [MeitouClient v0.17.4 release](https://github.com/VlcekM/MeitouClient/releases/tag/v0.17.4)
+Use the **.NET 11 SDK** (11.0.100 for this candidate), **Python 3.9+**, and the **Windows x64 v0.18.0 game** release. Extract the game to a directory of your choice. `MEITOU_DIR` points to the directory containing `MeitouClient.dll`, `Meitou.Core.dll`, `Meitou.Data.dll`, `Meitou.Simulation.dll` and `0Harmony.dll`. If you prefer a project-local install, the default is `.local/game/Meitou-0.18.0-win-x64/`. The framework references these assemblies at build time. Players get them from Meitou. [MeitouClient v0.18.0 release](https://github.com/VlcekM/MeitouClient/releases/tag/v0.18.0)
 
 ## Build and check a change
 
 Run these commands in PowerShell from the root of the checkout or extracted source ZIP.
 
 ```powershell
-$env:MEITOU_DIR = (Resolve-Path (Read-Host 'Extracted Meitou v0.17.4 game directory')).Path
+$env:MEITOU_DIR = (Resolve-Path (Read-Host 'Extracted Meitou v0.18.0 game directory')).Path
 dotnet build framework/Meitou.Transport.csproj -c Release
 dotnet run --project tests/Meitou.Transport.Tests.csproj -c Release
 python tools/package.py
@@ -19,7 +19,7 @@ The regular test suite runs without starting Kenshi. It reads the real FCS heade
 
 ## Repository conventions
 
-Use UTF-8, LF and spaces. C# uses four spaces and braces on new lines. JSON and MSBuild files use two spaces. The SDK treats build warnings as errors. These conventions follow the parts of Meitou's style that apply to this repository. Keep diffs focused and preserve shipped pack, craft and placement IDs across upgrades. [Meitou editor settings](https://github.com/VlcekM/MeitouClient/blob/v0.17.4/.editorconfig)
+Use UTF-8, LF and spaces. C# uses four spaces and braces on new lines. JSON and MSBuild files use two spaces. The SDK treats build warnings as errors. These conventions follow the parts of Meitou's style that apply to this repository. Keep diffs focused and preserve shipped pack, craft and placement IDs across upgrades. [Meitou editor settings](https://github.com/VlcekM/MeitouClient/blob/v0.18.0/.editorconfig)
 
 For a formatting pass, restore or build the relevant projects first. The last project below is the optional live verifier.
 

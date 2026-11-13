@@ -17,7 +17,7 @@ internal sealed record VesselView(string Mesh, string Texture, Vector3 Previous,
 internal sealed record MountView(CharacterId Animal, CharacterId Rider, MountDefinition Fit);
 internal sealed record TransportView(long Tick, VesselView[] Vessels, MountView[] Mounts);
 
-/// <summary>The engine-facing integration for Meitou v0.17.4.</summary>
+/// <summary>The engine-facing integration for Meitou v0.18.0.</summary>
 internal static class Presentation
 {
     private static readonly Type GameHost = GameType("Meitou.Game.GameHost");

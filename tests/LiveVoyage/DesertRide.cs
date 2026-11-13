@@ -8,6 +8,8 @@ internal static class DesertRide
 {
     internal const string Start = "Stoat Desert Ride";
     internal const string Garru = "42201-rebirth.mod";
+    internal const string PackBeast = "3999-gamedata.base";
+    internal const string StockBag = "4002-gamedata.base";
     internal const string Bull = "43949-rebirth.mod";
     private static readonly Vector2 Pin = new(34595, -70128);
     private static readonly (string Section, string Record)[] Outfit =
@@ -27,15 +29,15 @@ internal static class DesertRide
                 throw new InvalidOperationException($"Expected {record} equipped in {section}.");
     }
 
-    internal static void CheckStart(World world, WorldSnapshot snapshot, CharacterSnapshot rider)
+    internal static void CheckStart(World world, WorldSnapshot snapshot, CharacterSnapshot rider, string mountRecord)
     {
         CheckRider(world, rider);
         var party = snapshot.Characters.Where(c => c.IsPlayer).ToArray();
-        if (party.Length != 3 || party.Count(c => c.RecordId == Garru) != 1 || party.Count(c => c.RecordId == Bull) != 1)
-            throw new InvalidOperationException("Expected one rider, one owned Garru and one owned Domesticated Bull.");
+        if (party.Length != 3 || party.Count(c => c.RecordId == mountRecord) != 1 || party.Count(c => c.RecordId == Bull) != 1)
+            throw new InvalidOperationException($"Expected one rider, one owned {mountRecord} and one owned Domesticated Bull.");
         foreach (var member in party)
             if (Vector2.Distance(new(member.Position.X, member.Position.Z), Pin) > 40)
                 throw new InvalidOperationException($"{member.Name} spawned away from the pin at {member.Position}.");
-        Console.WriteLine($"LIVE RIDE Stoat start at {rider.Position}: female Scorchlander, all four items equipped, Garru and Domesticated Bull present.");
+        Console.WriteLine($"LIVE RIDE Stoat start at {rider.Position}: female Scorchlander, all four items equipped, {mountRecord} and Domesticated Bull present.");
     }
 }

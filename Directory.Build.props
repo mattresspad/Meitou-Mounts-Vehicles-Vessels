@@ -11,7 +11,7 @@
     <!-- The SDK otherwise embeds different generated files inside and outside a Git checkout. -->
     <EmbedUntrackedSources>false</EmbedUntrackedSources>
     <MeitouDir Condition="'$(MeitouDir)' == ''">$(MEITOU_DIR)</MeitouDir>
-    <MeitouDir Condition="'$(MeitouDir)' == ''">$(MSBuildThisFileDirectory).local/game/Meitou-0.17.4-win-x64</MeitouDir>
+    <MeitouDir Condition="'$(MeitouDir)' == ''">$(MSBuildThisFileDirectory).local/game/Meitou-0.18.0-win-x64</MeitouDir>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MeitouClient;Meitou.Core;Meitou.Data;Meitou.Simulation;0Harmony">
@@ -20,6 +20,6 @@
     </Reference>
   </ItemGroup>
   <Target Name="CheckMeitouRelease" BeforeTargets="ResolveAssemblyReferences">
-    <Error Condition="!Exists('$(MeitouDir)/MeitouClient.dll')" Text="Set MEITOU_DIR or -p:MeitouDir to the extracted Meitou game v0.17.4 release." />
+    <Error Condition="!Exists('$(MeitouDir)/MeitouClient.dll')" Text="Set MEITOU_DIR or -p:MeitouDir to the extracted Meitou game v0.18.0 release." />
   </Target>
 </Project>
