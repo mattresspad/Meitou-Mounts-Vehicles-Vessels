@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 3,
+  "packId": "stoat-desert-ride",
+  "mounts": [{
+    "id": "stoat-desert-ride.domesticated-bull",
+    "label": "Desert Bull Saddle",
+    "animalRecordIds": ["43949-rebirth.mod"],
+    "anchorBone": "Bip01 Spine2",
+    "saddleOffset": [0, 7.75, 2.25],
+    "saddleRotationDegrees": [-5, 0, 0],
+    "seatOffset": [0, 1.8, -0.35],
+    "seatYawDegrees": 0,
+    "saddleMesh": "meshes/stoat_bull_saddle.mesh",
+    "texture": "textures/stoat_bull_saddle.dds"
+  }]
+}

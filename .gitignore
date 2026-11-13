@@ -1,0 +1,46 @@
+# Local SDK, game installs, QA profiles, save copies and build products
+/.local/
+/dist/
+/artifacts/
+/data/
+/save/
+/mods.cfg
+meitou.local.json
+meitou.user.json
+live-voyage-saves/
+bin/
+obj/
+TestResults/
+__pycache__/
+*.py[cod]
+*.dll
+*.exe
+*.pdb
+*.zip
+*.log
+*.save
+*.base
+*.zone
+
+# Local recordings and playtest captures
+/recordings/
+/captures/
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+
+# Machine and editor state
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# The .mod headers, meshes and textures under mods/ are source assets.

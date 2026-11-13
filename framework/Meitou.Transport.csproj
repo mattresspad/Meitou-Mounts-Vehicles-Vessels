@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Meitou.Transport</AssemblyName>
+    <Version>0.3.0-playtest.3</Version>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <Target Name="PackageMod" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(MSBuildProjectDirectory)/../mods/Meitou Transport" />
+  </Target>
+</Project>

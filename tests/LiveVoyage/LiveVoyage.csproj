@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Meitou.Transport.LiveVoyage</AssemblyName>
+    <StageDir>$(MSBuildProjectDirectory)/../../.local/live-voyage/Meitou Transport Live Voyage</StageDir>
+  </PropertyGroup>
+  <Target Name="StageVerificationMod" AfterTargets="Build">
+    <MakeDir Directories="$(StageDir)" />
+    <Copy SourceFiles="$(TargetPath);$(MSBuildProjectDirectory)/meitou.json" DestinationFolder="$(StageDir)" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)/../../mods/Western Hive Skiff/Western Hive Skiff.mod"
+          DestinationFiles="$(StageDir)/Meitou Transport Live Voyage.mod" />
+  </Target>
+</Project>

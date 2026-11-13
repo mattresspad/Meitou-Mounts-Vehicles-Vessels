@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "packId": "western-hive",
+  "vessels": [
+    {
+      "id": "western-hive.skiff",
+      "label": "Western Hive Skiff",
+      "hullPath": "meshes/western_hive_demo_skiff.mesh",
+      "texture": "textures/western_hive_demo_skiff.dds",
+      "seatOffset": [0, 1, -7],
+      "length": 52,
+      "width": 18,
+      "draft": 2.5,
+      "speed": 32,
+      "turnDegrees": 60
+    }
+  ],
+  "placements": [
+    {
+      "id": "western-hive.anchorage",
+      "label": "Western Hive Skiff",
+      "vessel": "western-hive.skiff",
+      "x": -120780,
+      "z": -17640,
+      "headingDegrees": 0,
+      "placeOnLoad": true
+    }
+  ]
+}

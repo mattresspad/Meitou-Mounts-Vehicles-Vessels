@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 3,
+  "packId": "garru-saddle",
+  "mounts": [{
+    "id": "garru-saddle.trail",
+    "label": "Garru Trail Saddle",
+    "animalRecordIds": ["42201-rebirth.mod", "3999-gamedata.base"],
+    "anchorBone": "Bip01 Spine1",
+    "saddleOffset": [0.54, 9.05, 0.4],
+    "saddleRotationDegrees": [0, 0, 0],
+    "seatOffset": [0, 1.85, 0],
+    "seatYawDegrees": 0,
+    "saddleMesh": "meshes/mvv_garru_saddle.mesh",
+    "texture": "textures/mvv_garru_saddle.dds"
+  }]
+}
